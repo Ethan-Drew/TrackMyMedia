@@ -1,0 +1,63 @@
+@page "/users"
+@inject HttpClient Http
+
+<PageTitle>Users</PageTitle>
+
+<ul>
+    @if (users == null)
+    {
+        <li>Loading...</li>
+    }
+    else
+    {
+        @foreach (var user in users)
+        {
+            <li>@user.Username (@user.Email)</li>
+        }
+    }
+</ul>
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+@code {
+    private List<User> users;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Ensure that the response is properly deserialized into a List<User>
+        users = await Http.GetFromJsonAsync<List<User>>("http://localhost:5221/api/users");
+
+            if (users == null)
+            {
+                errorMessage = "No users found.";
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle errors here (e.g., log or display a message)
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    public class User
+    {
+        public int UserId { get; set; }
+        public string Username { get; set; }
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string PasswordHash { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public bool IsActive { get; set; }
+        public string Role { get; set; }
+    }
+}
