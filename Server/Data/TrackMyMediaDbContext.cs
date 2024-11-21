@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TrackMyMedia.Server.Data;
+using TrackMyMedia.Shared.Models;
 
 namespace TrackMyMedia.Server.Data
 {

@@ -1,4 +1,4 @@
-namespace TrackMyMedia.Server.Data
+namespace TrackMyMedia.Shared.Models
 {
     public class UserModel
     {

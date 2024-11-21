@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TrackMyMedia.Shared;
 using TrackMyMedia.Server.Data;
 
 namespace TrackMyMedia.Server.Controllers
@@ -20,7 +21,7 @@ namespace TrackMyMedia.Server.Controllers
         {
             try
             {
-                var users = await _context.Users.ToListAsync();  // Fetch Users from the DbSet<UserModel>
+                var users = await _context.Users.ToListAsync();
                 return Ok(users);
             }
             catch (Exception ex)
