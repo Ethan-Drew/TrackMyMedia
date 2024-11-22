@@ -17,8 +17,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add HttpClient
+var baseUrl = builder.Configuration["BaseUrl"]
+              ?? throw new ArgumentNullException(nameof(builder.Configuration), "BaseUrl is not configured.");
+
 builder.Services.AddScoped<HttpClient>(sp =>
-    new HttpClient { BaseAddress = new Uri(builder.Configuration["BaseUrl"]) });
+    new HttpClient { BaseAddress = new Uri(baseUrl) });
 
 builder.Services.AddDbContext<TrackMyMediaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
