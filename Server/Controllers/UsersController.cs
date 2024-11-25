@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TrackMyMedia.Shared;
-using TrackMyMedia.Server.Data;
+using TrackMyMedia.Server.Services;
 
 namespace TrackMyMedia.Server.Controllers
 {
@@ -9,11 +7,11 @@ namespace TrackMyMedia.Server.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly TrackMyMediaDbContext _context;
+        private readonly IUserService _userService;
 
-        public UsersController(TrackMyMediaDbContext context)
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -21,7 +19,7 @@ namespace TrackMyMedia.Server.Controllers
         {
             try
             {
-                var users = await _context.Users.ToListAsync();
+                var users = await _userService.GetAllUsersAsync();
                 return Ok(users);
             }
             catch (Exception ex)

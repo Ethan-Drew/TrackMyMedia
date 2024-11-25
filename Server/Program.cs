@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TrackMyMedia.Server.Data;
+using TrackMyMedia.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Add HttpClient
 var baseUrl = builder.Configuration["BaseUrl"]
@@ -35,6 +38,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
