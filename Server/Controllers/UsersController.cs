@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using TrackMyMedia.Shared.Models;
 using TrackMyMedia.Server.Services;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace TrackMyMedia.Server.Controllers
 {
@@ -7,11 +9,11 @@ namespace TrackMyMedia.Server.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IUserService UserService;
 
         public UsersController(IUserService userService)
         {
-            _userService = userService;
+            UserService = userService;
         }
 
         [HttpGet]
@@ -19,12 +21,40 @@ namespace TrackMyMedia.Server.Controllers
         {
             try
             {
-                var users = await _userService.GetAllUsersAsync();
+                var users = await UserService.GetAllUsersAsync();
                 return Ok(users);
             }
             catch (Exception ex)
             {
                 return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequestModel request)
+        {
+            try
+            {
+                await UserService.RegisterUser(request);
+                return Ok("Registration successful.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestModel request)
+        {
+            try
+            {
+                var response = await UserService.Login(request);
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }
