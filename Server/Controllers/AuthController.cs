@@ -2,20 +2,23 @@ using Microsoft.AspNetCore.Mvc;
 using TrackMyMedia.Shared.Models;
 using TrackMyMedia.Server.Services;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Authorization;
+using Shared.Models;
 
 namespace TrackMyMedia.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class AuthController : ControllerBase
     {
-        private readonly IUserService UserService;
+        private readonly IAuthService UserService;
 
-        public UsersController(IUserService userService)
+        public AuthController(IAuthService userService)
         {
             UserService = userService;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {

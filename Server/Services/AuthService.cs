@@ -11,12 +11,12 @@ using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace TrackMyMedia.Server.Services
 {
-    public class UserService : IUserService
+    public class AuthService : IAuthService
     {
         private readonly TrackMyMediaDbContext Context;
         private readonly AuthHelper authHelper;
 
-        public UserService(TrackMyMediaDbContext context, AuthHelper authHelper)
+        public AuthService(TrackMyMediaDbContext context, AuthHelper authHelper)
         {
             Context = context;
             this.authHelper = authHelper;
@@ -61,7 +61,6 @@ namespace TrackMyMedia.Server.Services
             await Context.SaveChangesAsync();
             return true;
         }
-
         public async Task<LoginResponseModel> Login(LoginRequestModel request)
         {
             if (string.IsNullOrEmpty(request.UsernameOrEmail) || string.IsNullOrEmpty(request.Password))
@@ -78,8 +77,8 @@ namespace TrackMyMedia.Server.Services
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 throw new ArgumentException("Invalid password.");
 
-            // Generate JWT token
-            var token = authHelper.GenerateJwtToken(user);
+            // Generate JWT token correctly
+            var token = authHelper.GenerateJwtToken(user.UserId.ToString(), user.Email, user.Role);
 
             return new LoginResponseModel
             {

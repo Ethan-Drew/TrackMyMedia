@@ -9,8 +9,8 @@ namespace TrackMyMedia.Server.Helpers
 {
     public class AuthHelper
     {
-        private readonly string _jwtSecretKey;
-        private const int TokenExpiryMinutes = 60;
+        private readonly string JwtSecretKey;
+        private const int TokenExpiryMinutes = 300;
 
         // Constructor to inject the secret key
         public AuthHelper(string jwtSecretKey)
@@ -18,29 +18,28 @@ namespace TrackMyMedia.Server.Helpers
             if (string.IsNullOrEmpty(jwtSecretKey))
                 throw new ArgumentNullException(nameof(jwtSecretKey), "JWT Secret Key cannot be null or empty.");
 
-            _jwtSecretKey = jwtSecretKey;
+            JwtSecretKey = jwtSecretKey;
         }
 
-        public string GenerateJwtToken(UserModel user)
+        public string GenerateJwtToken(string userId, string email, string role)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtSecretKey);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var claims = new[]
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role),
-                    new Claim("UserId", user.UserId.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(TokenExpiryMinutes),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
+        new Claim(ClaimTypes.Name, userId),
+        new Claim(ClaimTypes.Email, email),
+        new Claim(ClaimTypes.Role, role)
+    };
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSecretKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: "TrackMyMedia",
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(TokenExpiryMinutes),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

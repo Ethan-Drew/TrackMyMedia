@@ -1,7 +1,7 @@
 @page "/users"
 @using TrackMyMedia.Client.Services
 @using TrackMyMedia.Shared.Models
-@inject UserService UserService
+@inject AuthService AuthService
 
 <PageTitle>Users</PageTitle>
 
@@ -34,7 +34,7 @@
     {
         try
         {
-            users = await UserService.GetUsersAsync();
+            users = await AuthService.GetUsersAsync();
             if (users == null || users.Count == 0)
             {
                 errorMessage = "No users found.";

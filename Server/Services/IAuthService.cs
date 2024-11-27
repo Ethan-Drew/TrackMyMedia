@@ -4,7 +4,7 @@ using TrackMyMedia.Shared.Models;
 
 namespace TrackMyMedia.Server.Services
 {
-    public interface IUserService
+    public interface IAuthService
     {
         Task<List<UserModel>> GetAllUsersAsync();
         Task<bool> RegisterUser(RegisterRequestModel request);
