@@ -3,7 +3,6 @@ using TrackMyMedia.Shared.Models;
 using TrackMyMedia.Server.Services;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Authorization;
-using Shared.Models;
 
 namespace TrackMyMedia.Server.Controllers
 {

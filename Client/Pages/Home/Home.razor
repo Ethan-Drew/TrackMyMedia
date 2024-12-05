@@ -1,0 +1,81 @@
+﻿@page "/home"
+@using Blazored.LocalStorage
+@using System.IdentityModel.Tokens.Jwt
+@inject NavigationManager Navigation
+@inject ILocalStorageService localStorage
+
+<!-- Page Wrapper -->
+<div class="container-fluid py-5" style="min-height: 100vh; background-color: #F9F3E0;">
+    <div class="container">
+        <!-- Welcome Header -->
+        <div class="row">
+            <div class="col text-center">
+                <h1 class="display-4 text-primary">Welcome to TrackMyMedia</h1>
+                <p class="lead text-muted">Your personal media tracking app. Keep track of your movies, shows, games, and books.</p>
+            </div>
+        </div>
+
+        <!-- Conditional Content Based on Login Status -->
+        @if (isLoggedIn)
+        {
+            <!-- User Info Card -->
+            <div class="row justify-content-center mt-5">
+                <div class="col-lg-6 col-md-8 col-sm-12">
+                    <div class="card shadow-sm border-0 rounded-lg">
+                        <div class="card-body">
+                            <h4 class="card-title text-center mb-4 text-dark">Hello, @username!</h4>
+                            <p class="card-text text-center mb-4 text-muted">You are successfully logged in. Get started with adding your favorite media to TrackMyMedia.</p>
+                            <div class="text-center">
+                                <button class="btn btn-danger btn-lg" @onclick="Logout">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Login Prompt -->
+            <div class="row justify-content-center mt-5">
+                <div class="col-lg-6 col-md-8 col-sm-12">
+                    <div class="card shadow-sm border-0 rounded-lg">
+                        <div class="card-body">
+                            <h4 class="card-title text-center mb-4 text-dark">You are not logged in</h4>
+                            <p class="card-text text-center mb-4 text-muted">Please log in to start tracking your media.</p>
+                            <div class="text-center">
+                                <NavLink class="btn btn-primary btn-lg" href="/login">Login</NavLink>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private bool isLoggedIn = false;
+    private string username;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if the user has a token and other details in local storage
+        var token = await localStorage.GetItemAsync<string>("authToken");
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            isLoggedIn = true;
+
+            // Retrieve user details from local storage
+            username = await localStorage.GetItemAsync<string>("username");
+        }
+    }
+
+    private async Task Logout()
+    {
+        // Clear the token and user info from local storage and redirect to the login page
+        await localStorage.RemoveItemAsync("authToken");
+        await localStorage.RemoveItemAsync("username");
+        Navigation.NavigateTo("/login");
+    }
+}

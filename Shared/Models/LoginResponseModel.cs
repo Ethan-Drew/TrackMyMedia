@@ -1,9 +1,10 @@
-﻿namespace Shared.Models
+﻿namespace TrackMyMedia.Shared.Models
 {
     public class LoginResponseModel
     {
         public string Token { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
+        public string FirstName { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Shared.Models;
 using TrackMyMedia.Shared.Models;
 
 namespace TrackMyMedia.Server.Services

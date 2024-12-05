@@ -5,7 +5,6 @@ using TrackMyMedia.Server.Data;
 using TrackMyMedia.Shared.Models;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity.Data;
-using Shared.Models;
 using TrackMyMedia.Server.Helpers;
 using Microsoft.Extensions.Configuration.UserSecrets;
 
@@ -63,15 +62,15 @@ namespace TrackMyMedia.Server.Services
         }
         public async Task<LoginResponseModel> Login(LoginRequestModel request)
         {
-            if (string.IsNullOrEmpty(request.UsernameOrEmail) || string.IsNullOrEmpty(request.Password))
-                throw new ArgumentException("Username or email and password are required.");
+            if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
+                throw new ArgumentException("Username and password are required.");
 
             // Fetch user from the database
             var user = await Context.Users
-                .FirstOrDefaultAsync(u => u.Username == request.UsernameOrEmail || u.Email == request.UsernameOrEmail);
+                .FirstOrDefaultAsync(u => u.Username == request.Username);
 
             if (user == null)
-                throw new ArgumentException("Invalid username or email.");
+                throw new ArgumentException("Invalid username.");
 
             // Verify password
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
@@ -84,7 +83,8 @@ namespace TrackMyMedia.Server.Services
             {
                 Token = token,
                 Username = user.Username,
-                Email = user.Email
+                Email = user.Email,
+                FirstName = user.FirstName
             };
         }
 

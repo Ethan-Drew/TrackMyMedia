@@ -1,0 +1,80 @@
+﻿@page "/login"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ILocalStorageService localStorage
+@inject AuthService AuthService
+@using TrackMyMedia.Shared.Models
+@using TrackMyMedia.Client.Services
+@using System.Net.Http.Json
+@using Blazored.LocalStorage
+
+<h3>Login</h3>
+
+<EditForm Model="@loginRequest" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="username">Username</label>
+        <InputText id="username" class="form-control" @bind-Value="loginRequest.Username" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <InputText id="password" class="form-control" @bind-Value="loginRequest.Password" type="password" />
+    </div>
+
+    <button type="submit" class="btn btn-primary" disabled="@isLoading">Login</button>
+</EditForm>
+
+<p>Don't have an account? <NavLink href="/register">Register here</NavLink></p>
+
+@if (!string.IsNullOrEmpty(loginError))
+{
+    <div class="alert alert-danger mt-2">
+        @loginError
+    </div>
+}
+
+@code {
+    private LoginRequestModel loginRequest = new LoginRequestModel();
+    private string loginError;
+    private bool isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            isLoading = true;
+
+            // Ensure loginRequest has the correct values
+            if (string.IsNullOrEmpty(loginRequest.Username) || string.IsNullOrEmpty(loginRequest.Password))
+            {
+                loginError = "Both fields are required.";
+                return;
+            }
+
+            // Call the AuthService for login
+            var loginResponse = await AuthService.LoginUser(loginRequest.Username, loginRequest.Password);
+
+            if (loginResponse != null)
+            {
+                // Navigate to home
+                Navigation.NavigateTo("/home");
+            }
+            else
+            {
+                loginError = "Invalid username or password.";
+            }
+        }
+        catch (Exception ex)
+        {
+            loginError = $"An error occurred while logging in: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
+
