@@ -88,6 +88,9 @@ a, .btn-link {
             stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
             transition: stroke-dasharray 0.05s ease-in-out;
         }
+.table {
+    color: white;
+}
 
 .loading-progress-text {
     position: absolute;

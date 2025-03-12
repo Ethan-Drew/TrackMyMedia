@@ -1,17 +1,11 @@
 ﻿@inherits LayoutComponentBase
+@using TrackMyMedia.Client.Services
 
-<div class="page">
-    <div class="sidebar">
+    <div class="page" style="background-color: #001A33; min-height: 100vh; color: white; display: flex; flex-direction: column;">
         <NavMenu />
+        <main style="flex-grow: 1;">
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
     </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>

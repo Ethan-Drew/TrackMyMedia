@@ -1,0 +1,95 @@
+﻿<h3>Register</h3>
+
+<EditForm Model="registerRequestModel" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="username">Username</label>
+        <InputText id="username" class="form-control" @bind-Value="registerRequestModel.Username" />
+        <ValidationMessage For="@(() => registerRequestModel.Username)" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <InputText id="email" type="email" class="form-control" @bind-Value="registerRequestModel.Email" />
+        <ValidationMessage For="@(() => registerRequestModel.Email)" />
+    </div>
+
+    <div class="form-group">
+        <label for="firstName">First Name</label>
+        <InputText id="firstName" class="form-control" @bind-Value="registerRequestModel.FirstName" />
+        <ValidationMessage For="@(() => registerRequestModel.FirstName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <InputText id="lastName" class="form-control" @bind-Value="registerRequestModel.LastName" />
+        <ValidationMessage For="@(() => registerRequestModel.LastName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="registerRequestModel.Password" />
+        <ValidationMessage For="@(() => registerRequestModel.Password)" />
+    </div>
+
+    <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="confirmPassword" />
+        <ValidationMessage For="@(() => confirmPassword)" />
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Register</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger mt-3">
+            @errorMessage
+        </div>
+    }
+
+    @if (registrationSuccess)
+    {
+        <div class="alert alert-success mt-3">
+            Registration successful!
+        </div>
+    }
+</EditForm>
+
+@code {
+    @page "/register"
+
+    @using TrackMyMedia.Shared.Models
+    @using TrackMyMedia.Client.Services
+    @using Microsoft.AspNetCore.Components.Forms
+    @inject AuthService AuthService
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    private RegisterRequestModel registerRequestModel = new RegisterRequestModel();
+    private string confirmPassword = "";
+    private string errorMessage = "";
+    private bool registrationSuccess = false;
+
+    private async Task HandleSubmit()
+    {
+        if (registerRequestModel.Password != confirmPassword)
+        {
+            errorMessage = "Passwords do not match.";
+            return;
+        }
+        try
+        {
+            await AuthService.RegisterUser(registerRequestModel);
+            registrationSuccess = true;
+            errorMessage = "";
+            NavigationManager.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            registrationSuccess = false;
+        }
+    }
+}

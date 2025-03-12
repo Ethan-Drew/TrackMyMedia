@@ -1,34 +1,63 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Client</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
-
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Users">
-                <span class="oi oi-plus" aria-hidden="true"></span> Users
-            </NavLink>
-        </div>
-    </nav>
-</div>
+﻿@using Blazored.LocalStorage
+@using TrackMyMedia.Client.Services
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@inject ILocalStorageService localStorage
 
 @code {
-    private bool collapseNavMenu = true;
+    private bool isAuthenticated;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    protected override async Task OnInitializedAsync()
     {
-        collapseNavMenu = !collapseNavMenu;
+        // Check if token exists in local storage
+        var token = await localStorage.GetItemAsync<string>("authToken");
+
+        // Check if token is valid
+        isAuthenticated = !string.IsNullOrEmpty(token) && AuthService.IsValidToken(token);
     }
+
+    private async Task Logout()
+    {
+        // Clear local storage and logout
+        await localStorage.RemoveItemAsync("authToken");
+        await localStorage.RemoveItemAsync("username");
+        await AuthService.LogoutUser();
+
+        // Navigate to login page and refresh
+        Navigation.NavigateTo("/login");
+        await JSRuntime.InvokeVoidAsync("location.reload");
+    }
+}
+
+@if (isAuthenticated)
+{
+    <div class="navbar navbar-expand-lg navbar-dark" style="background-color: black;">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white" href="/home">TrackMyMedia</a>
+            <button title="Navigation menu" type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav" style="display: flex; gap: 20px; padding-left: 0;">
+                    <li class="nav-item">
+                        <a class="nav-link text-white d-flex align-items-center" href="/home">
+                            <span class="oi oi-home" aria-hidden="true"></span> Home
+                        </a>
+                    </li>
+                    <li class="nav-item" style="padding-top: 17px;">
+                        <a class="nav-link text-white d-flex align-items-center" href="/users">
+                            <span class="oi oi-plus" aria-hidden="true"></span> Users
+                        </a>
+                    </li>
+                    <li class="nav-item" style="padding-top: 17px;">
+                        <a class="nav-link text-white d-flex align-items-center" href="/Movies/MovieList">
+                            <span class="oi oi-plus" aria-hidden="true"></span> Movies
+                        </a>
+                    </li>
+                </ul>
+                <button class="btn btn-dark text-white ms-auto" style="background-color: #8B0000;" @onclick="Logout">Logout</button>
+            </div>
+        </div>
+    </div>
 }
