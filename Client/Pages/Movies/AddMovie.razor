@@ -16,6 +16,11 @@
     </div>
 
     <div class="form-group">
+        <label for="mediaType">Media Type</label>
+        <InputText id="mediaType" class="form-control" @bind-Value="newMovie.MediaType" readonly />
+    </div>
+
+    <div class="form-group">
         <label for="releaseDate">Release Date</label>
         <InputDate id="releaseDate" class="form-control" @bind-Value="newMovie.ReleaseDate" />
         <ValidationMessage For="() => newMovie.ReleaseDate" />
@@ -31,12 +36,6 @@
         <label for="timeSpent">Time Spent</label>
         <InputNumber id="timeSpent" class="form-control" @bind-Value="newMovie.TimeSpent" />
         <ValidationMessage For="() => newMovie.TimeSpent" />
-    </div>
-
-    <div class="form-group">
-        <label for="mediaType">Media Type</label>
-        <InputText id="mediaType" class="form-control" @bind-Value="newMovie.MediaType" />
-        <ValidationMessage For="() => newMovie.MediaType" />
     </div>
 
     <div class="form-group">
@@ -76,26 +75,30 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Add Movie</button>
+
+    <!-- Back Button -->
+    <button type="button" class="btn btn-secondary" @onclick="GoBack">Back</button>
 </EditForm>
 
 @code {
-    private MovieModel newMovie = new MovieModel { };
+    private MovieModel newMovie = new MovieModel { MediaType = "Movie" };
 
     private async Task HandleValidSubmit()
     {
-        // Send the movie data to the API (POST request)
         var response = await Http.PostAsJsonAsync("api/movie", newMovie);
 
         if (response.IsSuccessStatusCode)
         {
-            // Redirect to the movie list page or show a success message
-            Navigation.NavigateTo("/Movies");
+            Navigation.NavigateTo("/Movies/MovieList");
         }
         else
         {
-            // Handle errors (e.g., show a message)
             var errorMessage = await response.Content.ReadAsStringAsync();
-            // Show error message (e.g., using a modal or alert)
         }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/Movies/MovieList"); 
     }
 }
