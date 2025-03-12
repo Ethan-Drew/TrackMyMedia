@@ -25,10 +25,10 @@ namespace TrackMyMedia.Server.Helpers
         {
             var claims = new[]
             {
-        new Claim(ClaimTypes.Name, userId),
-        new Claim(ClaimTypes.Email, email),
-        new Claim(ClaimTypes.Role, role)
-    };
+            new Claim(ClaimTypes.Name, userId),
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Role, role)
+        };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSecretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

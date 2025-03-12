@@ -63,6 +63,7 @@ builder.Services.AddSingleton<AuthHelper>(sp =>
 
 builder.Services.AddAuthentication(options =>
 {
+    //Set default auth to JWT
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
@@ -70,12 +71,19 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
+        //Check token is valid
         ValidateIssuer = true,
+        //Check audience is valid - turned off for now
         ValidateAudience = false,
+        //Checl hasnt expired
         ValidateLifetime = true,
+        //Ensures signing of token is valid
         ValidateIssuerSigningKey = true,
+        //Check issuer is valid
         ValidIssuer = configuration["Jwt:Issuer"],
+        //Validate JWT integrity
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
+        //No allowance for clockskew when checking expiration
         ClockSkew = TimeSpan.Zero
     };
 });
@@ -89,6 +97,7 @@ builder.Services.AddScoped<HttpClient>(sp =>
 
 // General services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IMovieService, MovieService>();
 
 // Add DbContext
 builder.Services.AddDbContext<TrackMyMediaDbContext>(options =>

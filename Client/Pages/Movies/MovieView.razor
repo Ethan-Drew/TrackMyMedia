@@ -1,0 +1,117 @@
+﻿@page "/movieview/{MovieId:int}"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Movie Details</h3>
+
+@if (movie == null)
+{
+    <p><em>Loading movie details...</em></p>
+}
+else
+{
+    @if (!isEditing)
+    {
+        <!-- View Mode -->
+        <div>
+            <h4>@movie.Title</h4>
+            <p><strong>Director:</strong> @movie.Director</p>
+            <p><strong>Genre:</strong> @movie.Genre</p>
+            <p><strong>Release Date:</strong> @(movie.ReleaseDate?.ToShortDateString() ?? "N/A")</p>
+            <p><strong>My Rating:</strong> @(movie.MyRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Audience Rating:</strong> @(movie.AudienceRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Critic Rating:</strong> @(movie.CriticRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Average Length:</strong> @(movie.AverageLength.HasValue ? $"{movie.AverageLength} min" : "N/A")</p>
+            <p><strong>Time Spent:</strong> @(movie.TimeSpent.HasValue ? $"{movie.TimeSpent} min" : "N/A")</p>
+            <p><strong>Media Type:</strong> @movie.MediaType</p>
+            <p><strong>Date Added:</strong> @movie.DateAdded.ToShortDateString()</p>
+            <p><strong>Description:</strong> @movie.Description</p>
+
+            <button class="btn btn-primary" @onclick="StartEditing">Edit</button>
+            <button class="btn btn-secondary" @onclick="GoBack">Back</button>
+        </div>
+    }
+    else
+    {
+        <!-- Edit Mode -->
+        <div>
+            <h4>Edit Movie</h4>
+            <div class="mb-3">
+                <label>Title:</label>
+                <input class="form-control" @bind="movie.Title" />
+            </div>
+            <div class="mb-3">
+                <label>Director:</label>
+                <input class="form-control" @bind="movie.Director" />
+            </div>
+            <div class="mb-3">
+                <label>Genre:</label>
+                <input class="form-control" @bind="movie.Genre" />
+            </div>
+            <div class="mb-3">
+                <label>Release Date:</label>
+                <input type="date" class="form-control" @bind="movie.ReleaseDate" />
+            </div>
+            <div class="mb-3">
+                <label>My Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="movie.MyRating" />
+            </div>
+            <div class="mb-3">
+                <label>Audience Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="movie.AudienceRating" />
+            </div>
+            <div class="mb-3">
+                <label>Critic Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="movie.CriticRating" />
+            </div>
+            <div class="mb-3">
+                <label>Average Length (min):</label>
+                <input type="number" class="form-control" @bind="movie.AverageLength" />
+            </div>
+            <div class="mb-3">
+                <label>Time Spent (min):</label>
+                <input type="number" class="form-control" @bind="movie.TimeSpent" />
+            </div>
+            <div class="mb-3">
+                <label>Description:</label>
+                <textarea class="form-control" @bind="movie.Description"></textarea>
+            </div>
+
+            <button class="btn btn-success" @onclick="SaveChanges">Save</button>
+            <button class="btn btn-danger" @onclick="CancelEditing">Cancel</button>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int MovieId { get; set; }
+    private MovieModel? movie;
+    private bool isEditing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        movie = await Http.GetFromJsonAsync<MovieModel>($"api/movie/{MovieId}");
+    }
+
+    private void StartEditing()
+    {
+        isEditing = true;
+    }
+
+    private async Task SaveChanges()
+    {
+        await Http.PutAsJsonAsync($"api/movie/{MovieId}", movie);
+        isEditing = false;
+    }
+
+    private void CancelEditing()
+    {
+        isEditing = false;
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/Movies/MovieList");
+    }
+}

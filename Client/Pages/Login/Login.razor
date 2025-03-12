@@ -1,6 +1,7 @@
 ﻿@page "/login"
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 @inject ILocalStorageService localStorage
 @inject AuthService AuthService
 @using TrackMyMedia.Shared.Models
@@ -47,20 +48,18 @@
         {
             isLoading = true;
 
-            // Ensure loginRequest has the correct values
             if (string.IsNullOrEmpty(loginRequest.Username) || string.IsNullOrEmpty(loginRequest.Password))
             {
                 loginError = "Both fields are required.";
                 return;
             }
 
-            // Call the AuthService for login
             var loginResponse = await AuthService.LoginUser(loginRequest.Username, loginRequest.Password);
 
             if (loginResponse != null)
             {
-                // Navigate to home
                 Navigation.NavigateTo("/home");
+                await JSRuntime.InvokeVoidAsync("location.reload");
             }
             else
             {

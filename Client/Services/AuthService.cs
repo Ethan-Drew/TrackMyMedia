@@ -2,6 +2,7 @@
 using TrackMyMedia.Shared.Models;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace TrackMyMedia.Client.Services
 {
@@ -31,6 +32,19 @@ namespace TrackMyMedia.Client.Services
             await LocalStorage.SetItemAsync("username", response.Username);
             await LocalStorage.SetItemAsync("email", response.Email);
             await LocalStorage.SetItemAsync("firstName", response.FirstName);
+        }
+
+        public bool IsValidToken(string token)
+        {
+            try
+            {
+                var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                return jwtToken.ValidTo > DateTime.UtcNow;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<LoginResponseModel> LoginUser(string username, string password)

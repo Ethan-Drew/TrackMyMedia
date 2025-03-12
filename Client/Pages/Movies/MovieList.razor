@@ -1,0 +1,79 @@
+﻿@page "/Movies/MovieList"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Movie List</h3>
+
+<button class="btn btn-success mb-3" @onclick="AddMovie">Add Movie</button>
+
+@if (movies == null)
+{
+    <p><em>Loading movies...</em></p>
+}
+else if (!movies.Any())
+{
+    <p>No movies found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Director</th>
+                <th>Genre</th>
+                <th>Release Date</th>
+                <th>My Rating</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var movie in movies)
+            {
+                <tr>
+                    <td>@movie.Title</td>
+                    <td>@movie.Director</td>
+                    <td>@movie.Genre</td>
+                    <td>@(movie.ReleaseDate.HasValue ? movie.ReleaseDate.Value.ToShortDateString() : "N/A")</td>
+                    <td>@movie.MyRating</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => ViewMovie(movie.MediaId))">View</button>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteMovie(movie.MediaId))">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<MovieModel> movies;
+
+    protected override async Task OnInitializedAsync()
+    {
+        movies = await Http.GetFromJsonAsync<List<MovieModel>>("api/movie");
+    }
+
+    private void ViewMovie(int movieId)
+    {
+        Navigation.NavigateTo($"/movieview/{movieId}");
+    }
+
+    private void AddMovie()
+    {
+        Navigation.NavigateTo("/Movies/AddMovie");
+    }
+
+    private async Task DeleteMovie(int movieId)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this movie?"))
+        {
+            return;
+        }
+
+        await Http.DeleteAsync($"api/movie/{movieId}");
+        movies = await Http.GetFromJsonAsync<List<MovieModel>>("api/movie");
+    }
+}
