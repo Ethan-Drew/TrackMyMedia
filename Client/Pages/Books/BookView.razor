@@ -1,0 +1,122 @@
+﻿@page "/BookView/{MediaId:int}"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Book Details</h3>
+
+@if (book == null)
+{
+    <p><em>Loading book details...</em></p>
+}
+else
+{
+    @if (!isEditing)
+    {
+        <!-- View Mode -->
+        <div>
+            <h4>@book.Title</h4>
+            <p><strong>Author:</strong> @book.Author</p>
+            <p><strong>Genre:</strong> @book.Genre</p>
+            <p><strong>ISBN:</strong> @(book.ISBN ?? "N/A")</p>
+            <p><strong>Release Date:</strong> @(book.ReleaseDate?.ToShortDateString() ?? "N/A")</p>
+            <p><strong>My Rating:</strong> @(book.MyRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Audience Rating:</strong> @(book.AudienceRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Critic Rating:</strong> @(book.CriticRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Average Length:</strong> @(book.AverageLength.HasValue ? $"{book.AverageLength} min" : "N/A")</p>
+            <p><strong>Time Spent:</strong> @(book.TimeSpent.HasValue ? $"{book.TimeSpent} min" : "N/A")</p>
+            <p><strong>Media Type:</strong> @book.MediaType</p>
+            <p><strong>Date Added:</strong> @book.DateAdded.ToShortDateString()</p>
+            <p><strong>Description:</strong> @book.Description</p>
+
+            <button class="btn btn-primary" @onclick="StartEditing">Edit</button>
+            <button class="btn btn-secondary" @onclick="GoBack">Back</button>
+        </div>
+    }
+    else
+    {
+        <!-- Edit Mode -->
+        <div>
+            <h4>Edit Book</h4>
+            <div class="mb-3">
+                <label>Title:</label>
+                <input class="form-control" @bind="book.Title" />
+            </div>
+            <div class="mb-3">
+                <label>Author:</label>
+                <input class="form-control" @bind="book.Author" />
+            </div>
+            <div class="mb-3">
+                <label>Genre:</label>
+                <input class="form-control" @bind="book.Genre" />
+            </div>
+            <div class="mb-3">
+                <label>ISBN:</label>
+                <input class="form-control" @bind="book.ISBN" />
+            </div>
+            <div class="mb-3">
+                <label>Release Date:</label>
+                <input type="date" class="form-control" @bind="book.ReleaseDate" />
+            </div>
+            <div class="mb-3">
+                <label>My Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="book.MyRating" />
+            </div>
+            <div class="mb-3">
+                <label>Audience Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="book.AudienceRating" />
+            </div>
+            <div class="mb-3">
+                <label>Critic Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="book.CriticRating" />
+            </div>
+            <div class="mb-3">
+                <label>Average Length (min):</label>
+                <input type="number" class="form-control" @bind="book.AverageLength" />
+            </div>
+            <div class="mb-3">
+                <label>Time Spent (min):</label>
+                <input type="number" class="form-control" @bind="book.TimeSpent" />
+            </div>
+            <div class="mb-3">
+                <label>Description:</label>
+                <textarea class="form-control" @bind="book.Description"></textarea>
+            </div>
+
+            <button class="btn btn-success" @onclick="SaveChanges">Save</button>
+            <button class="btn btn-danger" @onclick="CancelEditing">Cancel</button>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int MediaId { get; set; }
+    private BookModel? book;
+    private bool isEditing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        book = await Http.GetFromJsonAsync<BookModel>($"api/book/{MediaId}");
+    }
+
+    private void StartEditing()
+    {
+        isEditing = true;
+    }
+
+    private async Task SaveChanges()
+    {
+        await Http.PutAsJsonAsync($"api/book/{MediaId}", book);
+        isEditing = false;
+    }
+
+    private void CancelEditing()
+    {
+        isEditing = false;
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/Books/BookList");
+    }
+}

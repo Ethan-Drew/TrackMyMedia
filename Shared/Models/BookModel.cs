@@ -21,6 +21,6 @@ namespace TrackMyMedia.Shared.Models
 
         public decimal? CriticRating { get; set; }
 
-        public int? AverageLength { get; set; } // Average reading time in minutes (e.g., total pages * average reading speed)
+        public int? AverageLength { get; set; } 
     }
 }

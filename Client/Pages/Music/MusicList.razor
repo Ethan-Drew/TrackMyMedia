@@ -1,0 +1,79 @@
+﻿@page "/Music/MusicList"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Music List</h3>
+
+<button class="btn btn-success mb-3" @onclick="AddMusic">Add Music</button>
+
+@if (musicItems == null)
+{
+    <p><em>Loading music...</em></p>
+}
+else if (!musicItems.Any())
+{
+    <p>No music found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Genre</th>
+                <th>My Rating</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var music in musicItems)
+            {
+                <tr>
+                    <td>@music.Title</td>
+                    <td>@music.Artist</td>
+                    <td>@music.Album</td>
+                    <td>@music.Genre</td>
+                    <td>@music.MyRating</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => ViewMusic(music.MediaId))">View</button>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteMusic(music.MediaId))">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<MusicModel> musicItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        musicItems = await Http.GetFromJsonAsync<List<MusicModel>>("api/music");
+    }
+
+    private void ViewMusic(int musicId)
+    {
+        Navigation.NavigateTo($"/musicview/{musicId}");
+    }
+
+    private void AddMusic()
+    {
+        Navigation.NavigateTo("/Music/AddMusic");
+    }
+
+    private async Task DeleteMusic(int musicId)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this music?"))
+        {
+            return;
+        }
+
+        await Http.DeleteAsync($"api/music/{musicId}");
+        musicItems = await Http.GetFromJsonAsync<List<MusicModel>>("api/music");
+    }
+}

@@ -1,4 +1,4 @@
-﻿@page "/movieview/{MovieId:int}"
+﻿@page "/movieview/{MediaId:int}"
 @using TrackMyMedia.Shared.Models
 @inject HttpClient Http
 @inject NavigationManager Navigation
@@ -85,13 +85,13 @@ else
 }
 
 @code {
-    [Parameter] public int MovieId { get; set; }
+    [Parameter] public int MediaId { get; set; }
     private MovieModel? movie;
     private bool isEditing = false;
 
     protected override async Task OnInitializedAsync()
     {
-        movie = await Http.GetFromJsonAsync<MovieModel>($"api/movie/{MovieId}");
+        movie = await Http.GetFromJsonAsync<MovieModel>($"api/movie/{MediaId}");
     }
 
     private void StartEditing()
@@ -101,7 +101,7 @@ else
 
     private async Task SaveChanges()
     {
-        await Http.PutAsJsonAsync($"api/movie/{MovieId}", movie);
+        await Http.PutAsJsonAsync($"api/movie/{MediaId}", movie);
         isEditing = false;
     }
 

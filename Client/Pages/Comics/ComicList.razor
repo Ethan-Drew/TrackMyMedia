@@ -1,0 +1,79 @@
+﻿@page "/Comics/ComicList"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Comic List</h3>
+
+<button class="btn btn-success mb-3" @onclick="AddComic">Add Comic</button>
+
+@if (comics == null)
+{
+    <p><em>Loading comics...</em></p>
+}
+else if (!comics.Any())
+{
+    <p>No comics found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Publisher</th>
+                <th>Issue Number</th>
+                <th>Release Date</th>
+                <th>My Rating</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var comic in comics)
+            {
+                <tr>
+                    <td>@comic.Title</td>
+                    <td>@comic.Publisher</td>
+                    <td>@comic.IssueNumber</td>
+                    <td>@(comic.ReleaseDate.HasValue ? comic.ReleaseDate.Value.ToShortDateString() : "N/A")</td>
+                    <td>@comic.MyRating</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => ViewComic(comic.MediaId))">View</button>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteComic(comic.MediaId))">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ComicModel> comics;
+
+    protected override async Task OnInitializedAsync()
+    {
+        comics = await Http.GetFromJsonAsync<List<ComicModel>>("api/comic");
+    }
+
+    private void ViewComic(int comicId)
+    {
+        Navigation.NavigateTo($"/comicview/{comicId}");
+    }
+
+    private void AddComic()
+    {
+        Navigation.NavigateTo("/Comics/AddComic");
+    }
+
+    private async Task DeleteComic(int comicId)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this comic?"))
+        {
+            return;
+        }
+
+        await Http.DeleteAsync($"api/comic/{comicId}");
+        comics = await Http.GetFromJsonAsync<List<ComicModel>>("api/comic");
+    }
+}

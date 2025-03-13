@@ -1,0 +1,110 @@
+﻿@page "/VideoGames/AddVideoGame"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Add Video Game</h3>
+
+<EditForm Model="newVideoGame" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="title">Title</label>
+        <InputText id="title" class="form-control" @bind-Value="newVideoGame.Title" />
+        <ValidationMessage For="() => newVideoGame.Title" />
+    </div>
+
+    <div class="form-group">
+        <label for="mediaType">Media Type</label>
+        <InputText id="mediaType" class="form-control" @bind-Value="newVideoGame.MediaType" readonly />
+    </div>
+
+    <div class="form-group">
+        <label for="releaseDate">Release Date</label>
+        <InputDate id="releaseDate" class="form-control" @bind-Value="newVideoGame.ReleaseDate" />
+        <ValidationMessage For="() => newVideoGame.ReleaseDate" />
+    </div>
+
+    <div class="form-group">
+        <label for="myRating">My Rating</label>
+        <InputNumber id="myRating" class="form-control" @bind-Value="newVideoGame.MyRating" />
+        <ValidationMessage For="() => newVideoGame.MyRating" />
+    </div>
+
+    <div class="form-group">
+        <label for="timeSpent">Time Spent</label>
+        <InputNumber id="timeSpent" class="form-control" @bind-Value="newVideoGame.TimeSpent" />
+        <ValidationMessage For="() => newVideoGame.TimeSpent" />
+    </div>
+
+    <div class="form-group">
+        <label for="developer">Developer</label>
+        <InputText id="developer" class="form-control" @bind-Value="newVideoGame.Developer" />
+        <ValidationMessage For="() => newVideoGame.Developer" />
+    </div>
+
+    <div class="form-group">
+        <label for="platform">Platform</label>
+        <InputText id="platform" class="form-control" @bind-Value="newVideoGame.Platform" />
+        <ValidationMessage For="() => newVideoGame.Platform" />
+    </div>
+
+    <div class="form-group">
+        <label for="genre">Genre</label>
+        <InputText id="genre" class="form-control" @bind-Value="newVideoGame.Genre" />
+        <ValidationMessage For="() => newVideoGame.Genre" />
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="newVideoGame.Description" />
+        <ValidationMessage For="() => newVideoGame.Description" />
+    </div>
+
+    <div class="form-group">
+        <label for="audienceRating">Audience Rating</label>
+        <InputNumber id="audienceRating" class="form-control" @bind-Value="newVideoGame.AudienceRating" />
+        <ValidationMessage For="() => newVideoGame.AudienceRating" />
+    </div>
+
+    <div class="form-group">
+        <label for="criticRating">Critic Rating</label>
+        <InputNumber id="criticRating" class="form-control" @bind-Value="newVideoGame.CriticRating" />
+        <ValidationMessage For="() => newVideoGame.CriticRating" />
+    </div>
+
+    <div class="form-group">
+        <label for="averageLength">Average Length (in hours)</label>
+        <InputNumber id="averageLength" class="form-control" @bind-Value="newVideoGame.AverageLength" />
+        <ValidationMessage For="() => newVideoGame.AverageLength" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Video Game</button>
+
+    <!-- Back Button -->
+    <button type="button" class="btn btn-secondary" @onclick="GoBack">Back</button>
+</EditForm>
+
+@code {
+    private VideoGameModel newVideoGame = new VideoGameModel { MediaType = "Video Game" };
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await Http.PostAsJsonAsync("api/videogame", newVideoGame);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/VideoGames/VideoGameList");
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/VideoGames/VideoGameList");
+    }
+}

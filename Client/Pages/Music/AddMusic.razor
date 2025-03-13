@@ -1,0 +1,110 @@
+﻿@page "/Music/AddMusic"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Add Music</h3>
+
+<EditForm Model="newMusic" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="title">Title</label>
+        <InputText id="title" class="form-control" @bind-Value="newMusic.Title" />
+        <ValidationMessage For="() => newMusic.Title" />
+    </div>
+
+    <div class="form-group">
+        <label for="mediaType">Media Type</label>
+        <InputText id="mediaType" class="form-control" @bind-Value="newMusic.MediaType" readonly />
+    </div>
+
+    <div class="form-group">
+        <label for="releaseDate">Release Date</label>
+        <InputDate id="releaseDate" class="form-control" @bind-Value="newMusic.ReleaseDate" />
+        <ValidationMessage For="() => newMusic.ReleaseDate" />
+    </div>
+
+    <div class="form-group">
+        <label for="myRating">My Rating</label>
+        <InputNumber id="myRating" class="form-control" @bind-Value="newMusic.MyRating" />
+        <ValidationMessage For="() => newMusic.MyRating" />
+    </div>
+
+    <div class="form-group">
+        <label for="timeSpent">Time Spent</label>
+        <InputNumber id="timeSpent" class="form-control" @bind-Value="newMusic.TimeSpent" />
+        <ValidationMessage For="() => newMusic.TimeSpent" />
+    </div>
+
+    <div class="form-group">
+        <label for="artist">Artist</label>
+        <InputText id="artist" class="form-control" @bind-Value="newMusic.Artist" />
+        <ValidationMessage For="() => newMusic.Artist" />
+    </div>
+
+    <div class="form-group">
+        <label for="album">Album</label>
+        <InputText id="album" class="form-control" @bind-Value="newMusic.Album" />
+        <ValidationMessage For="() => newMusic.Album" />
+    </div>
+
+    <div class="form-group">
+        <label for="genre">Genre</label>
+        <InputText id="genre" class="form-control" @bind-Value="newMusic.Genre" />
+        <ValidationMessage For="() => newMusic.Genre" />
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="newMusic.Description" />
+        <ValidationMessage For="() => newMusic.Description" />
+    </div>
+
+    <div class="form-group">
+        <label for="audienceRating">Audience Rating</label>
+        <InputNumber id="audienceRating" class="form-control" @bind-Value="newMusic.AudienceRating" />
+        <ValidationMessage For="() => newMusic.AudienceRating" />
+    </div>
+
+    <div class="form-group">
+        <label for="criticRating">Critic Rating</label>
+        <InputNumber id="criticRating" class="form-control" @bind-Value="newMusic.CriticRating" />
+        <ValidationMessage For="() => newMusic.CriticRating" />
+    </div>
+
+    <div class="form-group">
+        <label for="averageLength">Average Length</label>
+        <InputNumber id="averageLength" class="form-control" @bind-Value="newMusic.AverageLength" />
+        <ValidationMessage For="() => newMusic.AverageLength" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Music</button>
+
+    <!-- Back Button -->
+    <button type="button" class="btn btn-secondary" @onclick="GoBack">Back</button>
+</EditForm>
+
+@code {
+    private MusicModel newMusic = new MusicModel { MediaType = "Music" };
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await Http.PostAsJsonAsync("api/music", newMusic);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/Music/MusicList");
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/Music/MusicList");
+    }
+}
