@@ -98,6 +98,12 @@ builder.Services.AddScoped<HttpClient>(sp =>
 // General services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMovieService, MovieService>();
+builder.Services.AddScoped<IAnimeService, AnimeService>();
+builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IComicService, ComicService>();
+builder.Services.AddScoped<IMusicService, MusicService>();
+builder.Services.AddScoped<ITVShowService, TVShowService>();
+builder.Services.AddScoped<IVideoGameService, VideoGameService>();
 
 // Add DbContext
 builder.Services.AddDbContext<TrackMyMediaDbContext>(options =>
