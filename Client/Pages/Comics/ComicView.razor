@@ -1,0 +1,117 @@
+﻿@page "/ComicView/{MediaId:int}"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Comic Details</h3>
+
+@if (comic == null)
+{
+    <p><em>Loading comic details...</em></p>
+}
+else
+{
+    @if (!isEditing)
+    {
+        <!-- View Mode -->
+        <div>
+            <h4>@comic.Title</h4>
+            <p><strong>Publisher:</strong> @comic.Publisher</p>
+            <p><strong>Release Date:</strong> @(comic.ReleaseDate?.ToShortDateString() ?? "N/A")</p>
+            <p><strong>Issue Number:</strong> @comic.IssueNumber</p>
+            <p><strong>My Rating:</strong> @(comic.MyRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Audience Rating:</strong> @(comic.AudienceRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Critic Rating:</strong> @(comic.CriticRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Average Length:</strong> @(comic.AverageLength.HasValue ? $"{comic.AverageLength} min" : "N/A")</p>
+            <p><strong>Time Spent:</strong> @(comic.TimeSpent.HasValue ? $"{comic.TimeSpent} min" : "N/A")</p>
+            <p><strong>Media Type:</strong> @comic.MediaType</p>
+            <p><strong>Date Added:</strong> @comic.DateAdded.ToShortDateString()</p>
+            <p><strong>Description:</strong> @comic.Description</p>
+
+            <button class="btn btn-primary" @onclick="StartEditing">Edit</button>
+            <button class="btn btn-secondary" @onclick="GoBack">Back</button>
+        </div>
+    }
+    else
+    {
+        <!-- Edit Mode -->
+        <div>
+            <h4>Edit Comic</h4>
+            <div class="mb-3">
+                <label>Title:</label>
+                <input class="form-control" @bind="comic.Title" />
+            </div>
+            <div class="mb-3">
+                <label>Publisher:</label>
+                <input class="form-control" @bind="comic.Publisher" />
+            </div>
+            <div class="mb-3">
+                <label>Issue Number:</label>
+                <input type="number" class="form-control" @bind="comic.IssueNumber" />
+            </div>
+            <div class="mb-3">
+                <label>Release Date:</label>
+                <input type="date" class="form-control" @bind="comic.ReleaseDate" />
+            </div>
+            <div class="mb-3">
+                <label>My Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="comic.MyRating" />
+            </div>
+            <div class="mb-3">
+                <label>Audience Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="comic.AudienceRating" />
+            </div>
+            <div class="mb-3">
+                <label>Critic Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="comic.CriticRating" />
+            </div>
+            <div class="mb-3">
+                <label>Average Length (min):</label>
+                <input type="number" class="form-control" @bind="comic.AverageLength" />
+            </div>
+            <div class="mb-3">
+                <label>Time Spent (min):</label>
+                <input type="number" class="form-control" @bind="comic.TimeSpent" />
+            </div>
+            <div class="mb-3">
+                <label>Description:</label>
+                <textarea class="form-control" @bind="comic.Description"></textarea>
+            </div>
+
+            <button class="btn btn-success" @onclick="SaveChanges">Save</button>
+            <button class="btn btn-danger" @onclick="CancelEditing">Cancel</button>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int MediaId { get; set; }
+    private ComicModel? comic;
+    private bool isEditing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        comic = await Http.GetFromJsonAsync<ComicModel>($"api/comic/{MediaId}");
+    }
+
+    private void StartEditing()
+    {
+        isEditing = true;
+    }
+
+    private async Task SaveChanges()
+    {
+        await Http.PutAsJsonAsync($"api/comic/{MediaId}", comic);
+        isEditing = false;
+    }
+
+    private void CancelEditing()
+    {
+        isEditing = false;
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/Comics/ComicList");
+    }
+}

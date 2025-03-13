@@ -1,0 +1,79 @@
+﻿@page "/TVShows/TVShowList"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>TV Show List</h3>
+
+<button class="btn btn-success mb-3" @onclick="AddTVShow">Add TV Show</button>
+
+@if (tvShows == null)
+{
+    <p><em>Loading TV shows...</em></p>
+}
+else if (!tvShows.Any())
+{
+    <p>No TV shows found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Genre</th>
+                <th>Seasons</th>
+                <th>Episodes</th>
+                <th>My Rating</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tvShow in tvShows)
+            {
+                <tr>
+                    <td>@tvShow.Title</td>
+                    <td>@tvShow.Genre</td>
+                    <td>@tvShow.Seasons</td>
+                    <td>@tvShow.Episodes</td>
+                    <td>@tvShow.MyRating</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => ViewTVShow(tvShow.MediaId))">View</button>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteTVShow(tvShow.MediaId))">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<TVShowModel> tvShows;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tvShows = await Http.GetFromJsonAsync<List<TVShowModel>>("api/tvshow");
+    }
+
+    private void ViewTVShow(int tvShowId)
+    {
+        Navigation.NavigateTo($"/tvshowview/{tvShowId}");
+    }
+
+    private void AddTVShow()
+    {
+        Navigation.NavigateTo("/TVShows/AddTVShow");
+    }
+
+    private async Task DeleteTVShow(int tvShowId)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this TV show?"))
+        {
+            return;
+        }
+
+        await Http.DeleteAsync($"api/tvshow/{tvShowId}");
+        tvShows = await Http.GetFromJsonAsync<List<TVShowModel>>("api/tvshow");
+    }
+}

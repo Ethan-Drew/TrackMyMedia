@@ -1,0 +1,81 @@
+﻿@page "/Anime/AnimeList"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Anime List</h3>
+
+<button class="btn btn-success mb-3" @onclick="AddAnime">Add Anime</button>
+
+@if (animes == null)
+{
+    <p><em>Loading anime...</em></p>
+}
+else if (!animes.Any())
+{
+    <p>No anime found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Studio</th>
+                <th>Season Count</th>
+                <th>Episode Count</th>
+                <th>Release Date</th>
+                <th>My Rating</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var anime in animes)
+            {
+                <tr>
+                    <td>@anime.Title</td>
+                    <td>@anime.Studio</td>
+                    <td>@anime.SeasonCount</td>
+                    <td>@anime.EpisodeCount</td>
+                    <td>@(anime.ReleaseDate.HasValue ? anime.ReleaseDate.Value.ToShortDateString() : "N/A")</td>
+                    <td>@anime.MyRating</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => ViewAnime(anime.MediaId))">View</button>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteAnime(anime.MediaId))">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<AnimeModel> animes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        animes = await Http.GetFromJsonAsync<List<AnimeModel>>("api/anime");
+    }
+
+    private void ViewAnime(int animeId)
+    {
+        Navigation.NavigateTo($"/animeview/{animeId}");
+    }
+
+    private void AddAnime()
+    {
+        Navigation.NavigateTo("/Anime/AddAnime");
+    }
+
+    private async Task DeleteAnime(int animeId)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this anime?"))
+        {
+            return;
+        }
+
+        await Http.DeleteAsync($"api/anime/{animeId}");
+        animes = await Http.GetFromJsonAsync<List<AnimeModel>>("api/anime");
+    }
+}

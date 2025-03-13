@@ -1,0 +1,79 @@
+﻿@page "/Books/BookList"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Book List</h3>
+
+<button class="btn btn-success mb-3" @onclick="AddBook">Add Book</button>
+
+@if (books == null)
+{
+    <p><em>Loading books...</em></p>
+}
+else if (!books.Any())
+{
+    <p>No books found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Release Date</th>
+                <th>My Rating</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in books)
+            {
+                <tr>
+                    <td>@book.Title</td>
+                    <td>@book.Author</td>
+                    <td>@book.Genre</td>
+                    <td>@(book.ReleaseDate.HasValue ? book.ReleaseDate.Value.ToShortDateString() : "N/A")</td>
+                    <td>@book.MyRating</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => ViewBook(book.MediaId))">View</button>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteBook(book.MediaId))">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<BookModel> books;
+
+    protected override async Task OnInitializedAsync()
+    {
+        books = await Http.GetFromJsonAsync<List<BookModel>>("api/book");
+    }
+
+    private void ViewBook(int bookId)
+    {
+        Navigation.NavigateTo($"/bookview/{bookId}");
+    }
+
+    private void AddBook()
+    {
+        Navigation.NavigateTo("/Books/AddBook");
+    }
+
+    private async Task DeleteBook(int bookId)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this book?"))
+        {
+            return;
+        }
+
+        await Http.DeleteAsync($"api/book/{bookId}");
+        books = await Http.GetFromJsonAsync<List<BookModel>>("api/book");
+    }
+}

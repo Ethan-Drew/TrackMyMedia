@@ -1,0 +1,79 @@
+﻿@page "/VideoGames/VideoGameList"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Video Game List</h3>
+
+<button class="btn btn-success mb-3" @onclick="AddVideoGame">Add Video Game</button>
+
+@if (videoGames == null)
+{
+    <p><em>Loading video games...</em></p>
+}
+else if (!videoGames.Any())
+{
+    <p>No video games found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Developer</th>
+                <th>Platform</th>
+                <th>Genre</th>
+                <th>My Rating</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var videoGame in videoGames)
+            {
+                <tr>
+                    <td>@videoGame.Title</td>
+                    <td>@videoGame.Developer</td>
+                    <td>@videoGame.Platform</td>
+                    <td>@videoGame.Genre</td>
+                    <td>@videoGame.MyRating</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => ViewVideoGame(videoGame.MediaId))">View</button>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteVideoGame(videoGame.MediaId))">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<VideoGameModel> videoGames;
+
+    protected override async Task OnInitializedAsync()
+    {
+        videoGames = await Http.GetFromJsonAsync<List<VideoGameModel>>("api/videogame");
+    }
+
+    private void ViewVideoGame(int videoGameId)
+    {
+        Navigation.NavigateTo($"/videogameview/{videoGameId}");
+    }
+
+    private void AddVideoGame()
+    {
+        Navigation.NavigateTo("/VideoGames/AddVideoGame");
+    }
+
+    private async Task DeleteVideoGame(int videoGameId)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this video game?"))
+        {
+            return;
+        }
+
+        await Http.DeleteAsync($"api/videogame/{videoGameId}");
+        videoGames = await Http.GetFromJsonAsync<List<VideoGameModel>>("api/videogame");
+    }
+}

@@ -1,0 +1,107 @@
+﻿@page "/MusicView/{MediaId:int}"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Music Details</h3>
+
+@if (music == null)
+{
+    <p><em>Loading music details...</em></p>
+}
+else
+{
+    @if (!isEditing)
+    {
+        <!-- View Mode -->
+        <div>
+            <h4>@music.Album</h4>
+            <p><strong>Artist:</strong> @music.Artist</p>
+            <p><strong>Genre:</strong> @music.Genre</p>
+            <p><strong>Audience Rating:</strong> @(music.AudienceRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Critic Rating:</strong> @(music.CriticRating?.ToString("0.0") ?? "N/A")</p>
+            <p><strong>Average Length:</strong> @(music.AverageLength.HasValue ? $"{music.AverageLength} min" : "N/A")</p>
+            <p><strong>Time Spent:</strong> @(music.TimeSpent.HasValue ? $"{music.TimeSpent} min" : "N/A")</p>
+            <p><strong>Media Type:</strong> @music.MediaType</p>
+            <p><strong>Date Added:</strong> @music.DateAdded.ToShortDateString()</p>
+            <p><strong>Description:</strong> @music.Description</p>
+
+            <button class="btn btn-primary" @onclick="StartEditing">Edit</button>
+            <button class="btn btn-secondary" @onclick="GoBack">Back</button>
+        </div>
+    }
+    else
+    {
+        <!-- Edit Mode -->
+        <div>
+            <h4>Edit Music</h4>
+            <div class="mb-3">
+                <label>Album:</label>
+                <input class="form-control" @bind="music.Album" />
+            </div>
+            <div class="mb-3">
+                <label>Artist:</label>
+                <input class="form-control" @bind="music.Artist" />
+            </div>
+            <div class="mb-3">
+                <label>Genre:</label>
+                <input class="form-control" @bind="music.Genre" />
+            </div>
+            <div class="mb-3">
+                <label>Audience Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="music.AudienceRating" />
+            </div>
+            <div class="mb-3">
+                <label>Critic Rating:</label>
+                <input type="number" step="0.1" class="form-control" @bind="music.CriticRating" />
+            </div>
+            <div class="mb-3">
+                <label>Average Length (min):</label>
+                <input type="number" class="form-control" @bind="music.AverageLength" />
+            </div>
+            <div class="mb-3">
+                <label>Time Spent (min):</label>
+                <input type="number" class="form-control" @bind="music.TimeSpent" />
+            </div>
+            <div class="mb-3">
+                <label>Description:</label>
+                <textarea class="form-control" @bind="music.Description"></textarea>
+            </div>
+
+            <button class="btn btn-success" @onclick="SaveChanges">Save</button>
+            <button class="btn btn-danger" @onclick="CancelEditing">Cancel</button>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int MediaId { get; set; }
+    private MusicModel? music;
+    private bool isEditing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        music = await Http.GetFromJsonAsync<MusicModel>($"api/music/{MediaId}");
+    }
+
+    private void StartEditing()
+    {
+        isEditing = true;
+    }
+
+    private async Task SaveChanges()
+    {
+        await Http.PutAsJsonAsync($"api/music/{MediaId}", music);
+        isEditing = false;
+    }
+
+    private void CancelEditing()
+    {
+        isEditing = false;
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/Music/MusicList");
+    }
+}

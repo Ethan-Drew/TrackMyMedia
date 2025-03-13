@@ -1,0 +1,110 @@
+﻿@page "/Anime/AddAnime"
+@using TrackMyMedia.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Add Anime</h3>
+
+<EditForm Model="newAnime" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="title">Title</label>
+        <InputText id="title" class="form-control" @bind-Value="newAnime.Title" />
+        <ValidationMessage For="() => newAnime.Title" />
+    </div>
+
+    <div class="form-group">
+        <label for="mediaType">Media Type</label>
+        <InputText id="mediaType" class="form-control" @bind-Value="newAnime.MediaType" readonly />
+    </div>
+
+    <div class="form-group">
+        <label for="releaseDate">Release Date</label>
+        <InputDate id="releaseDate" class="form-control" @bind-Value="newAnime.ReleaseDate" />
+        <ValidationMessage For="() => newAnime.ReleaseDate" />
+    </div>
+
+    <div class="form-group">
+        <label for="myRating">My Rating</label>
+        <InputNumber id="myRating" class="form-control" @bind-Value="newAnime.MyRating" />
+        <ValidationMessage For="() => newAnime.MyRating" />
+    </div>
+
+    <div class="form-group">
+        <label for="timeSpent">Time Spent</label>
+        <InputNumber id="timeSpent" class="form-control" @bind-Value="newAnime.TimeSpent" />
+        <ValidationMessage For="() => newAnime.TimeSpent" />
+    </div>
+
+    <div class="form-group">
+        <label for="studio">Studio</label>
+        <InputText id="studio" class="form-control" @bind-Value="newAnime.Studio" />
+        <ValidationMessage For="() => newAnime.Studio" />
+    </div>
+
+    <div class="form-group">
+        <label for="episodeCount">Episode Count</label>
+        <InputNumber id="episodeCount" class="form-control" @bind-Value="newAnime.EpisodeCount" />
+        <ValidationMessage For="() => newAnime.EpisodeCount" />
+    </div>
+
+    <div class="form-group">
+        <label for="seasonCount">Season Count</label>
+        <InputNumber id="seasonCount" class="form-control" @bind-Value="newAnime.SeasonCount" />
+        <ValidationMessage For="() => newAnime.SeasonCount" />
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="newAnime.Description" />
+        <ValidationMessage For="() => newAnime.Description" />
+    </div>
+
+    <div class="form-group">
+        <label for="audienceRating">Audience Rating</label>
+        <InputNumber id="audienceRating" class="form-control" @bind-Value="newAnime.AudienceRating" />
+        <ValidationMessage For="() => newAnime.AudienceRating" />
+    </div>
+
+    <div class="form-group">
+        <label for="criticRating">Critic Rating</label>
+        <InputNumber id="criticRating" class="form-control" @bind-Value="newAnime.CriticRating" />
+        <ValidationMessage For="() => newAnime.CriticRating" />
+    </div>
+
+    <div class="form-group">
+        <label for="averageLength">Average Length</label>
+        <InputNumber id="averageLength" class="form-control" @bind-Value="newAnime.AverageLength" />
+        <ValidationMessage For="() => newAnime.AverageLength" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Anime</button>
+
+    <!-- Back Button -->
+    <button type="button" class="btn btn-secondary" @onclick="GoBack">Back</button>
+</EditForm>
+
+@code {
+    private AnimeModel newAnime = new AnimeModel { MediaType = "Anime" };
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await Http.PostAsJsonAsync("api/anime", newAnime);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/Anime/AnimeList");
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/Anime/AnimeList");
+    }
+}
